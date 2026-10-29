@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>India Defence Expenditure & Procurement Management System (IDE-PMS)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            mil: {
+              950: '#070b12',
+              900: '#0b1320',
+              850: '#0f1c2e',
+              800: '#14253d',
+              700: '#1e385c',
+              accent: '#06b6d4',
+              indigenous: '#10b981',
+              warning: '#f59e0b',
+              danger: '#f43f5e',
+              gold: '#eab308'
+            }
+          },
+          fontFamily: {
+            sans: ['"Inter"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #070b12; }
+    ::-webkit-scrollbar-thumb { background: #1e385c; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+
+    .glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.25); }
+    .glow-emerald { box-shadow: 0 0 15px rgba(16, 185, 129, 0.25); }
+    .grid-pattern {
+      background-size: 28px 28px;
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="bg-mil-950 text-slate-200 font-sans antialiased h-screen flex overflow-hidden selection:bg-cyan-500 selection:text-black">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside id="sidebar" class="w-64 bg-mil-900 border-r border-slate-800/80 flex flex-col justify-between shrink-0 z-30 transition-all duration-300 select-none">
+    <div>
+      <!-- Brand & Emblem Header -->
+      <div class="h-16 flex items-center px-5 gap-3 border-b border-slate-800/90 bg-mil-950/40">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-emerald-600 to-amber-500 p-0.5 flex items-center justify-center shadow-lg shadow-cyan-900/30">
+          <div class="w-full h-full bg-mil-900 rounded-[10px] flex items-center justify-center text-cyan-400">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-white tracking-wider text-sm">IDE-PMS</span>
+            <span class="text-[9px] px-1 py-0.2 rounded font-mono font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">MoD</span>
+          </div>
+          <span class="text-[10px] block text-slate-400 font-mono">DBMS Analytics Suite</span>
+        </div>
+      </div>
+
+      <!-- Nav Items -->
+      <nav class="p-3 space-y-1.5 mt-2">
+        <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition bg-cyan-950/60 text-cyan-400 border border-cyan-700/40">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>Expenditure Dashboard</span>
+        </button>
+
+        <button onclick="switchView('contracts')" id="nav-contracts" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+          <i data-lucide="file-signature" class="w-4 h-4 text-emerald-400"></i>
+          <span>Procurement Contracts</span>
+          <span id="badge-contract-count" class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-mono">0</span>
+        </button>
+
+        <button onclick="switchView('assets')" id="nav-assets" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+          <i data-lucide="crosshair" class="w-4 h-4 text-cyan-400"></i>
+          <span>Capital Strategic Assets</span>
+        </button>
+
+        <button onclick="switchView('vendors')" id="nav-vendors" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+          <i data-lucide="building-2" class="w-4 h-4 text-amber-400"></i>
+          <span>Defence Vendors & PSUs</span>
+        </button>
+
+        <button onclick="switchView('allocations')" id="nav-allocations" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+          <i data-lucide="history" class="w-4 h-4 text-violet-400"></i>
+          <span>1947–Present Allocations</span>
+        </button>
+
+        <div class="pt-4 pb-1 px-3">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 font-mono">DBMS Submission Engine</p>
+        </div>
+
+        <button onclick="switchView('sql')" id="nav-sql" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+          <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+          <span>SQL Query Studio</span>
+          <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-cyan-900/40 text-cyan-300 font-mono border border-cyan-800">EXEC</span>
+        </button>
+
+        <button onclick="switchView('schema')" id="nav-schema" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs transition text-slate-400 hover:bg-slate-800/60 hover:text-white">
+          <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+          <span>Schema & ER Diagrams</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- DB Stats / LocalStorage Footnote -->
+    <div class="p-3 border-t border-slate-800/90 bg-mil-950/60 text-xs">
+      <div class="bg-mil-850/80 rounded-xl p-3 border border-slate-700/60 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-slate-400 text-[11px]">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Relational Store</span>
+          </div>
+          <span class="font-mono text-[10px] text-cyan-400">6 Tables (3NF)</span>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-tight">In-Memory Engine with LocalStorage sync.</p>
+        <button onclick="resetDataset()" class="w-full text-center text-[10px] py-1 text-slate-400 hover:text-amber-400 border border-slate-700/80 hover:border-amber-400/40 rounded-lg transition font-mono">
+          ↺ Reset to Default Dataset
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main class="flex-1 flex flex-col overflow-hidden bg-mil-950 relative grid-pattern">
+
+    <!-- Top App Bar -->
+    <header class="h-16 bg-mil-900/90 backdrop-blur border-b border-slate-800 px-6 flex items-center justify-between z-20 shrink-0">
+      <div class="flex items-center gap-4">
+        <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-slate-400 hover:bg-slate-800">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div>
+          <h1 id="topbar-title" class="text-base font-bold text-white flex items-center gap-2">
+            National Defence Expenditure & Procurement Management System
+          </h1>
+          <p id="topbar-sub" class="text-xs text-slate-400 font-mono">Ministry of Defence (MoD) • Historical Analysis (1947–2026)</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button onclick="openModal('modal-contract')" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow-lg shadow-emerald-950">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>New Contract</span>
+        </button>
+        <button onclick="openModal('modal-asset')" class="inline-flex items-center gap-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold px-3 py-2 rounded-xl transition shadow-lg shadow-cyan-950">
+          <i data-lucide="shield-plus" class="w-3.5 h-3.5"></i>
+          <span>Register Asset</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Workspace -->
+    <div id="content-scrollable" class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- ================= 1. EXPENDITURE DASHBOARD ================= -->
+      <section id="view-dashboard" class="space-y-6">
+        <!-- Metric Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1 -->
+          <div class="bg-mil-900/80 rounded-2xl p-5 border border-slate-800 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-mono uppercase tracking-wider text-slate-400">FY 2024-26 Defence Outlay</p>
+                <h3 id="stat-latest-budget" class="text-2xl font-black text-white mt-1 font-mono">₹6,21,540 Cr</h3>
+              </div>
+              <div class="w-11 h-11 rounded-xl bg-cyan-950 text-cyan-400 border border-cyan-800/60 flex items-center justify-center">
+                <i data-lucide="landmark" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center text-xs text-slate-400 gap-1.5 font-mono">
+              <span class="text-emerald-400 font-semibold">~1.91% of GDP</span>
+              <span>•</span>
+              <span class="text-slate-400">13.04% of Union Budget</span>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-mil-900/80 rounded-2xl p-5 border border-slate-800 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Aatmanirbhar Indigenous Share</p>
+                <h3 id="stat-indigenous-percent" class="text-2xl font-black text-emerald-400 mt-1 font-mono">75.8%</h3>
+              </div>
+              <div class="w-11 h-11 rounded-xl bg-emerald-950 text-emerald-400 border border-emerald-800/60 flex items-center justify-center">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center text-xs text-emerald-400/90 gap-1 font-mono">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>Target: &gt;75% Domestic Procurement</span>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-mil-900/80 rounded-2xl p-5 border border-slate-800 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Tracked Capital Contracts</p>
+                <h3 id="stat-total-contracts-val" class="text-2xl font-black text-white mt-1 font-mono">₹2,84,350 Cr</h3>
+              </div>
+              <div class="w-11 h-11 rounded-xl bg-amber-950 text-amber-400 border border-amber-800/60 flex items-center justify-center">
+                <i data-lucide="file-check-2" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center text-xs text-slate-400 gap-1 font-mono">
+              <span id="stat-contracts-count" class="text-amber-400 font-semibold">12</span>
+              <span>active multi-year contracts</span>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="bg-mil-900/80 rounded-2xl p-5 border border-slate-800 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Strategic Capital Assets</p>
+                <h3 id="stat-total-assets-val" class="text-2xl font-black text-cyan-300 mt-1 font-mono">₹3,41,800 Cr</h3>
+              </div>
+              <div class="w-11 h-11 rounded-xl bg-violet-950 text-violet-400 border border-violet-800/60 flex items-center justify-center">
+                <i data-lucide="radar" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center text-xs text-slate-400 gap-1 font-mono">
+              <span id="stat-assets-units" class="text-cyan-400 font-semibold">1,240+</span>
+              <span>units across 3 services + Coast Guard</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Chart 1: Historical Timeline -->
+          <div class="lg:col-span-2 bg-mil-900/90 rounded-2xl p-5 border border-slate-800 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="line-chart" class="w-4 h-4 text-cyan-400"></i>
+                  Defence Spending Evolution (1947–Present)
+                </h3>
+                <p class="text-[11px] text-slate-400 font-mono">Highlights: 1962 Sino-Indian War, 1971 Liberation War, 1999 Kargil, 2020 LAC Build-up</p>
+              </div>
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <button onclick="setHistoricalChartScale('logarithmic')" id="btn-scale-log" class="px-2.5 py-1 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[11px]">Log Scale</button>
+                <button onclick="setHistoricalChartScale('linear')" id="btn-scale-linear" class="px-2.5 py-1 rounded bg-slate-800 text-slate-400 text-[11px]">Linear</button>
+              </div>
+            </div>
+            <div class="h-72">
+              <canvas id="historicalSpendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Budget Breakdown (Capital vs Revenue vs Pensions) -->
+          <div class="bg-mil-900/90 rounded-2xl p-5 border border-slate-800 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-400"></i>
+                  Current Budget Composition
+                </h3>
+              </div>
+              <p class="text-[11px] text-slate-400 font-mono mb-4">Capital Modernization vs Personnel vs Pensions</p>
+              <div class="h-52 flex items-center justify-center">
+                <canvas id="budgetBreakdownChart"></canvas>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 grid grid-cols-3 gap-1 text-center font-mono text-[10px]">
+              <div class="bg-mil-950 p-2 rounded border border-slate-800">
+                <span class="text-cyan-400 font-bold block">28.4%</span>
+                <span class="text-slate-400">Capital</span>
+              </div>
+              <div class="bg-mil-950 p-2 rounded border border-slate-800">
+                <span class="text-amber-400 font-bold block">48.9%</span>
+                <span class="text-slate-400">Revenue/Ops</span>
+              </div>
+              <div class="bg-mil-950 p-2 rounded border border-slate-800">
+                <span class="text-rose-400 font-bold block">22.7%</span>
+                <span class="text-slate-400">Pensions</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Split & Latest Audit Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Service Procurement Bar -->
+          <div class="lg:col-span-2 bg-mil-900/90 rounded-2xl p-5 border border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-400"></i>
+                Service-Wise Procurement Capital Allocation (₹ Cr)
+              </h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Live Aggregate Query</span>
+            </div>
+            <div class="h-60">
+              <canvas id="serviceProcurementChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Database Transaction Audit Trail -->
+          <div class="bg-mil-900/90 rounded-2xl p-5 border border-slate-800 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
+                  Database Audit Log (Trigger Log)
+                </h3>
+                <span class="text-[10px] font-mono text-cyan-400">AuditLogs Table</span>
+              </div>
+              <div class="space-y-2 overflow-y-auto max-h-56 pr-1" id="audit-log-stream">
+                <!-- Dynamically populated audit items -->
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-800 text-[10px] text-slate-500 font-mono flex justify-between">
+              <span>ACID Safe In-Memory Transactions</span>
+              <button onclick="clearAuditLogs()" class="hover:text-rose-400">Clear Logs</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. PROCUREMENT CONTRACTS TABLE ================= -->
+      <section id="view-contracts" class="hidden space-y-4">
+        <div class="bg-mil-900/80 p-4 rounded-2xl border border-slate-800 flex flex-wrap gap-3 items-center justify-between">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="relative w-64">
+              <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+              <input type="text" id="contract-search" oninput="renderContractsTable()" placeholder="Search contract, weapon, vendor..." class="w-full text-xs bg-mil-950 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+            </div>
+            <select id="contract-status-filter" onchange="renderContractsTable()" class="text-xs bg-mil-950 border border-slate-700/80 text-slate-300 rounded-xl px-3 py-2">
+              <option value="">All Statuses</option>
+              <option value="Signed">Signed</option>
+              <option value="In Production">In Production</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Under Review">Under Review</option>
+            </select>
+            <select id="contract-service-filter" onchange="renderContractsTable()" class="text-xs bg-mil-950 border border-slate-700/80 text-slate-300 rounded-xl px-3 py-2">
+              <option value="">All Services</option>
+              <!-- Populated via JS -->
+            </select>
+          </div>
+          <button onclick="openModal('modal-contract')" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Procurement Contract</span>
+          </button>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-mil-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-mil-950/80 text-slate-400 font-mono uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Contract ID</th>
+                  <th class="py-3 px-4">Program / Hardware Title</th>
+                  <th class="py-3 px-4">Assigned Service</th>
+                  <th class="py-3 px-4">Vendor & Origin</th>
+                  <th class="py-3 px-4 font-mono text-right">Value (₹ Cr)</th>
+                  <th class="py-3 px-4 text-center">Indigenous %</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="contracts-table-body" class="divide-y divide-slate-800 text-slate-300">
+                <!-- dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. CAPITAL ASSETS ================= -->
+      <section id="view-assets" class="hidden space-y-4">
+        <div class="bg-mil-900/80 p-4 rounded-2xl border border-slate-800 flex flex-wrap gap-3 items-center justify-between">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="relative w-64">
+              <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+              <input type="text" id="asset-search" oninput="renderAssetsTable()" placeholder="Search platform (Rafale, INS, T-90)..." class="w-full text-xs bg-mil-950 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+            </div>
+            <select id="asset-cat-filter" onchange="renderAssetsTable()" class="text-xs bg-mil-950 border border-slate-700/80 text-slate-300 rounded-xl px-3 py-2">
+              <option value="">All Categories</option>
+              <option value="Fighter Aircraft">Fighter Aircraft</option>
+              <option value="Air Defence">Air Defence</option>
+              <option value="Naval Vessel">Naval Vessel</option>
+              <option value="Radar/EW">Radar/EW</option>
+              <option value="Armoured Vehicle">Armoured Vehicle</option>
+              <option value="Missile System">Missile System</option>
+            </select>
+          </div>
+          <button onclick="openModal('modal-asset')" class="inline-flex items-center gap-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Register Capital Asset</span>
+          </button>
+        </div>
+
+        <div class="bg-mil-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-mil-950/80 text-slate-400 font-mono uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Asset ID</th>
+                  <th class="py-3 px-4">Asset / System Name</th>
+                  <th class="py-3 px-4">Category</th>
+                  <th class="py-3 px-4">Service Arm</th>
+                  <th class="py-3 px-4 font-mono text-center">Inducted</th>
+                  <th class="py-3 px-4 font-mono text-right">Units</th>
+                  <th class="py-3 px-4 font-mono text-right">Unit Cost (₹ Cr)</th>
+                  <th class="py-3 px-4 font-mono text-right">Total Outlay (₹ Cr)</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="assets-table-body" class="divide-y divide-slate-800 text-slate-300">
+                <!-- dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. DEFENCE VENDORS & PSUS ================= -->
+      <section id="view-vendors" class="hidden space-y-4">
+        <div class="bg-mil-900/80 p-4 rounded-2xl border border-slate-800 flex flex-wrap gap-3 items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="relative w-64">
+              <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-3"></i>
+              <input type="text" id="vendor-search" oninput="renderVendorsGrid()" placeholder="Search vendor name, country..." class="w-full text-xs bg-mil-950 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+            </div>
+            <select id="vendor-type-filter" onchange="renderVendorsGrid()" class="text-xs bg-mil-950 border border-slate-700/80 text-slate-300 rounded-xl px-3 py-2">
+              <option value="">All Vendor Types</option>
+              <option value="Domestic PSU">Domestic Defence PSU</option>
+              <option value="Private Domestic">Private Domestic</option>
+              <option value="Foreign OEM">Foreign OEM</option>
+            </select>
+          </div>
+          <button onclick="openModal('modal-vendor')" class="inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Register Vendor</span>
+          </button>
+        </div>
+
+        <div id="vendors-card-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- dynamically rendered vendor cards -->
+        </div>
+      </section>
+
+      <!-- ================= 5. ALLOCATIONS (1947–PRESENT) ================= -->
+      <section id="view-allocations" class="hidden space-y-4">
+        <div class="bg-mil-900/80 p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i>
+              Historical Defence Budget Allocation Ledger (1947 to Present)
+            </h3>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">Primary table capturing post-independence geopolitical shifts and fiscal allocations.</p>
+          </div>
+          <button onclick="exportAllocationsCsv()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center gap-1.5">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+
+        <div class="bg-mil-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-mil-950/80 text-slate-400 font-mono uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Fiscal Year</th>
+                  <th class="py-3 px-4 font-mono text-right">Total Budget (₹ Cr)</th>
+                  <th class="py-3 px-4 font-mono text-center">Share of GDP (%)</th>
+                  <th class="py-3 px-4 font-mono text-center">Capital (%)</th>
+                  <th class="py-3 px-4 font-mono text-center">Revenue (%)</th>
+                  <th class="py-3 px-4 font-mono text-center">Pensions (%)</th>
+                  <th class="py-3 px-4">Strategic Era Context</th>
+                </tr>
+              </thead>
+              <tbody id="allocations-table-body" class="divide-y divide-slate-800 text-slate-300 font-mono">
+                <!-- dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. SQL QUERY STUDIO ================= -->
+      <section id="view-sql" class="hidden space-y-4">
+        <!-- Preset Academic Queries -->
+        <div class="bg-mil-900/80 p-4 rounded-2xl border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <p class="text-xs font-mono uppercase font-bold text-slate-400 flex items-center gap-2">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+              Academic Mini-Project Pre-Loaded Relational Queries:
+            </p>
+            <span class="text-[10px] text-cyan-400 font-mono">Select to Test SQL Engine</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+            <button onclick="loadSqlPreset(1)" class="text-left p-2.5 rounded-xl bg-mil-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-xs transition">
+              <span class="font-bold text-white block mb-0.5">1. Multi-Table JOIN</span>
+              <span class="text-[10px] text-slate-400 font-mono">Contracts + Vendors + Services</span>
+            </button>
+            <button onclick="loadSqlPreset(2)" class="text-left p-2.5 rounded-xl bg-mil-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-xs transition">
+              <span class="font-bold text-white block mb-0.5">2. GROUP BY Aggregate</span>
+              <span class="text-[10px] text-slate-400 font-mono">Total Procurement by Service</span>
+            </button>
+            <button onclick="loadSqlPreset(3)" class="text-left p-2.5 rounded-xl bg-mil-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-xs transition">
+              <span class="font-bold text-white block mb-0.5">3. Indigenization Split</span>
+              <span class="text-[10px] text-slate-400 font-mono">Domestic PSU vs Foreign OEM</span>
+            </button>
+            <button onclick="loadSqlPreset(4)" class="text-left p-2.5 rounded-xl bg-mil-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 text-xs transition">
+              <span class="font-bold text-white block mb-0.5">4. Top Strategic Assets</span>
+              <span class="text-[10px] text-slate-400 font-mono">Ranked by Total Cost Outlay</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Editor Box -->
+        <div class="bg-mil-900 rounded-2xl p-4 border border-slate-800 shadow-2xl">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="font-mono text-cyan-400 ml-2">MoD RDBMS Console v4.2 [Hospital & Defence DBMS Core]</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="sql-exec-time" class="text-slate-400 font-mono text-[11px]">Ready</span>
+              <button onclick="runCustomSql()" class="bg-cyan-500 hover:bg-cyan-400 text-mil-950 font-bold px-4 py-1.5 rounded-lg transition text-xs flex items-center gap-1.5 shadow-md shadow-cyan-900/30">
+                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                <span>Execute SQL</span>
+              </button>
+            </div>
+          </div>
+
+          <textarea id="sql-editor" rows="6" class="w-full bg-mil-950 border border-slate-800 rounded-xl p-3.5 text-cyan-300 font-mono text-xs focus:outline-none focus:border-cyan-500 leading-relaxed resize-y selection:bg-cyan-900"></textarea>
+
+          <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 mt-2 font-mono">
+            <span>Supported: SELECT, FROM, JOIN, ON, WHERE, GROUP BY, ORDER BY, LIMIT</span>
+            <span>Target Catalog: <strong class="text-slate-300">IndiaDefenceDBMS</strong></span>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="bg-mil-900/90 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+          <div class="p-3.5 bg-mil-950 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-slate-300 flex items-center gap-2">
+              <i data-lucide="table-2" class="w-4 h-4 text-cyan-400"></i>
+              Query Output: <span id="sql-rows-count" class="text-cyan-400">0</span> records
+            </span>
+            <button onclick="exportSqlToCsv()" class="text-xs text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+            </button>
+          </div>
+          <div class="overflow-x-auto max-h-96">
+            <table id="sql-results-table" class="w-full text-left text-xs font-mono">
+              <!-- rendered by JS SQL evaluator -->
+            </table>
+          </div>
+          <div id="sql-empty-state" class="py-12 text-center text-slate-500 text-xs font-mono">
+            Execute a query or choose a preset to inspect live relational tuples.
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. SCHEMA & ER DIAGRAM ================= -->
+      <section id="view-schema" class="hidden space-y-6">
+        <div class="bg-mil-900/80 p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="git-merge" class="w-4 h-4 text-emerald-400"></i>
+              Entity-Relationship Architecture & Normalization (3NF / BCNF)
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Relational schema designed to eliminate insertion, deletion, and update anomalies.</p>
+          </div>
+          <button onclick="copyDdlScript()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span id="copy-ddl-btn-label">Copy MySQL DDL Script</span>
+          </button>
+        </div>
+
+        <!-- Visual Entity Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Allocations -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden bg-mil-900/60 shadow-lg">
+            <div class="bg-mil-950 p-3 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5 text-cyan-400"></i> Allocations
+              </span>
+              <span class="text-[10px] font-mono text-cyan-400">Master Fiscal</span>
+            </div>
+            <div class="p-3 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between text-amber-400 font-semibold">
+                <span>fiscal_year (PK)</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(10)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>total_budget_inr_cr</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(12,2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>gdp_percent</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(4,2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>capital_percent</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(4,2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>revenue_percent</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(4,2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>pension_percent</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(4,2)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Services -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden bg-mil-900/60 shadow-lg">
+            <div class="bg-mil-950 p-3 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5 text-emerald-400"></i> Services
+              </span>
+              <span class="text-[10px] font-mono text-emerald-400">Armed Branches</span>
+            </div>
+            <div class="p-3 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between text-amber-400 font-semibold">
+                <span>service_id (PK)</span>
+                <span class="text-[10px] text-slate-500">INT AUTO</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>service_name</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(50) UNIQUE</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>hq_location</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(60)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>active_strength</span>
+                <span class="text-[10px] text-slate-500">INT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vendors -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden bg-mil-900/60 shadow-lg">
+            <div class="bg-mil-950 p-3 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5 text-amber-400"></i> Vendors
+              </span>
+              <span class="text-[10px] font-mono text-amber-400">Defense Industrial Base</span>
+            </div>
+            <div class="p-3 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between text-amber-400 font-semibold">
+                <span>vendor_id (PK)</span>
+                <span class="text-[10px] text-slate-500">INT AUTO</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>vendor_name</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(100)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>vendor_type</span>
+                <span class="text-[10px] text-slate-500">ENUM(...)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>country</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(50)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>daps_certified</span>
+                <span class="text-[10px] text-slate-500">BOOLEAN</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ProcurementContracts -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden bg-mil-900/60 shadow-lg">
+            <div class="bg-mil-950 p-3 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5 text-cyan-400"></i> ProcurementContracts
+              </span>
+              <span class="text-[10px] font-mono text-cyan-400">Capital Ledger</span>
+            </div>
+            <div class="p-3 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between text-amber-400 font-semibold">
+                <span>contract_id (PK)</span>
+                <span class="text-[10px] text-slate-500">INT AUTO</span>
+              </div>
+              <div class="flex justify-between text-cyan-400">
+                <span>service_id (FK)</span>
+                <span class="text-[10px] text-slate-500">&rarr; Services</span>
+              </div>
+              <div class="flex justify-between text-cyan-400">
+                <span>vendor_id (FK)</span>
+                <span class="text-[10px] text-slate-500">&rarr; Vendors</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>title</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(120)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>amount_inr_cr</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(12,2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>indigenous_percent</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(5,2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>status</span>
+                <span class="text-[10px] text-slate-500">ENUM(...)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CapitalAssets -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden bg-mil-900/60 shadow-lg">
+            <div class="bg-mil-950 p-3 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5 text-rose-400"></i> CapitalAssets
+              </span>
+              <span class="text-[10px] font-mono text-rose-400">Operational Stock</span>
+            </div>
+            <div class="p-3 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between text-amber-400 font-semibold">
+                <span>asset_id (PK)</span>
+                <span class="text-[10px] text-slate-500">INT AUTO</span>
+              </div>
+              <div class="flex justify-between text-cyan-400">
+                <span>service_id (FK)</span>
+                <span class="text-[10px] text-slate-500">&rarr; Services</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>asset_name</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(100)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>category</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(50)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>quantity</span>
+                <span class="text-[10px] text-slate-500">INT</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>unit_cost_cr</span>
+                <span class="text-[10px] text-slate-500">DECIMAL(10,2)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AuditLogs -->
+          <div class="border border-slate-800 rounded-xl overflow-hidden bg-mil-900/60 shadow-lg">
+            <div class="bg-mil-950 p-3 border-b border-slate-800 flex justify-between items-center">
+              <span class="font-mono font-bold text-white text-xs flex items-center gap-1.5">
+                <i data-lucide="table" class="w-3.5 h-3.5 text-violet-400"></i> AuditLogs
+              </span>
+              <span class="text-[10px] font-mono text-violet-400">Transaction Triggers</span>
+            </div>
+            <div class="p-3 text-xs space-y-1.5 font-mono">
+              <div class="flex justify-between text-amber-400 font-semibold">
+                <span>log_id (PK)</span>
+                <span class="text-[10px] text-slate-500">INT AUTO</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>action_type</span>
+                <span class="text-[10px] text-slate-500">ENUM(INSERT, UPDATE...)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>table_affected</span>
+                <span class="text-[10px] text-slate-500">VARCHAR(50)</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>timestamp</span>
+                <span class="text-[10px] text-slate-500">DATETIME</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>details</span>
+                <span class="text-[10px] text-slate-500">TEXT</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DDL Source Code Display Box -->
+        <div class="bg-mil-900 rounded-2xl p-4 border border-slate-800">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <span class="text-xs font-mono font-bold text-cyan-400">Relational DDL Implementation Code (MySQL / MariaDB / Postgres)</span>
+            <span class="text-[10px] font-mono text-slate-500">Foreign Keys • Cascade Rules • Indexing</span>
+          </div>
+          <pre id="ddl-source-view" class="bg-mil-950 text-emerald-400 p-4 rounded-xl font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800 max-h-80"></pre>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= MODALS (CRUD) ================= -->
+
+  <!-- Modal 1: Procurement Contract Modal -->
+  <div id="modal-contract" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-mil-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-slate-800 bg-mil-950/60 flex items-center justify-between">
+        <h3 id="modal-contract-title" class="font-bold text-white text-sm">Add New Procurement Contract</h3>
+        <button onclick="closeModal('modal-contract')" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-contract" onsubmit="saveContract(event)" class="p-5 space-y-3.5 text-xs">
+        <input type="hidden" id="contract-form-id" value="">
+        <div>
+          <label class="block font-mono text-slate-300 mb-1">Contract / Hardware Program Title *</label>
+          <input type="text" id="c-title" placeholder="e.g. 83 Tejas MK1A Fighter Jets" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Allocated Service (FK) *</label>
+            <select id="c-service" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+              <!-- Filled dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Assigned Vendor (FK) *</label>
+            <select id="c-vendor" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+              <!-- Filled dynamically -->
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Total Value (₹ Cr) *</label>
+            <input type="number" id="c-amount" min="1" step="0.5" placeholder="e.g. 48000" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono">
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Indigenous Content % *</label>
+            <input type="number" id="c-indigenous" min="0" max="100" placeholder="e.g. 65" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Execution Status *</label>
+            <select id="c-status" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+              <option value="Signed">Signed</option>
+              <option value="In Production">In Production</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Under Review">Under Review</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Signing Year *</label>
+            <input type="number" id="c-year" min="1947" max="2030" value="2024" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono">
+          </div>
+        </div>
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-contract')" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-white">Save Contract</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Capital Asset Modal -->
+  <div id="modal-asset" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-mil-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-slate-800 bg-mil-950/60 flex items-center justify-between">
+        <h3 class="font-bold text-white text-sm">Register Capital Strategic Asset</h3>
+        <button onclick="closeModal('modal-asset')" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-asset" onsubmit="saveAsset(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-mono text-slate-300 mb-1">Platform / Asset Name *</label>
+          <input type="text" id="a-name" placeholder="e.g. Rafale F3R, S-400 Triumf, INS Vikrant" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Asset Category *</label>
+            <select id="a-category" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+              <option value="Fighter Aircraft">Fighter Aircraft</option>
+              <option value="Air Defence">Air Defence</option>
+              <option value="Naval Vessel">Naval Vessel</option>
+              <option value="Radar/EW">Radar/EW</option>
+              <option value="Armoured Vehicle">Armoured Vehicle</option>
+              <option value="Missile System">Missile System</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Operating Branch (FK) *</label>
+            <select id="a-service" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+              <!-- filled dynamically -->
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Induction Year</label>
+            <input type="number" id="a-year" min="1950" max="2030" value="2022" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono">
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Quantity</label>
+            <input type="number" id="a-qty" min="1" value="36" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono">
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Unit Cost (₹ Cr)</label>
+            <input type="number" id="a-cost" min="0.1" step="0.1" value="670" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono">
+          </div>
+        </div>
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-asset')" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold text-white">Save Platform</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Defence Vendor Modal -->
+  <div id="modal-vendor" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-mil-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-slate-800 bg-mil-950/60 flex items-center justify-between">
+        <h3 class="font-bold text-white text-sm">Register Defence Manufacturer / Vendor</h3>
+        <button onclick="closeModal('modal-vendor')" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-vendor" onsubmit="saveVendor(event)" class="p-5 space-y-3.5 text-xs">
+        <div>
+          <label class="block font-mono text-slate-300 mb-1">Enterprise Name *</label>
+          <input type="text" id="v-name" placeholder="e.g. Hindustan Aeronautics Limited (HAL)" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Vendor Classification *</label>
+            <select id="v-type" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+              <option value="Domestic PSU">Domestic PSU</option>
+              <option value="Private Domestic">Private Domestic</option>
+              <option value="Foreign OEM">Foreign OEM</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-slate-300 mb-1">Country of Origin *</label>
+            <input type="text" id="v-country" value="India" required class="w-full bg-mil-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+        <div class="flex items-center gap-2 pt-2">
+          <input type="checkbox" id="v-certified" checked class="w-4 h-4 rounded text-cyan-600 bg-mil-950 border-slate-700">
+          <label for="v-certified" class="text-slate-300 font-mono">DAPS / MoD Production Quality Cleared</label>
+        </div>
+        <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-vendor')" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 font-semibold text-white">Save Vendor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ================= JAVASCRIPT SYSTEM ENGINE ================= -->
+  <script>
+    /* ----------------------------------------------------
+       1. RELATIONAL DATABASE ENGINE (IN-MEMORY + STORAGE)
+       ---------------------------------------------------- */
+    const STORAGE_KEY = 'INDIA_DEFENCE_DBMS_V3';
+
+    // Canonical Dataset Seed: Covers 1947 to 2026 accurately
+    const INITIAL_DB_SEED = {
+      allocations: [
+        { fiscal_year: '1947-48', total_budget_inr_cr: 92.74, gdp_percent: 1.60, capital_percent: 12.0, revenue_percent: 88.0, pension_percent: 0.0, context: 'Post-Partition asset split & First Kashmir conflict' },
+        { fiscal_year: '1961-62', total_budget_inr_cr: 309.80, gdp_percent: 1.70, capital_percent: 16.0, revenue_percent: 84.0, pension_percent: 0.0, context: 'Pre-1962 Sino-Indian conflict baseline' },
+        { fiscal_year: '1963-64', total_budget_inr_cr: 816.12, gdp_percent: 3.80, capital_percent: 24.0, revenue_percent: 76.0, pension_percent: 0.0, context: 'Emergency rearmament post 1962 shock' },
+        { fiscal_year: '1971-72', total_budget_inr_cr: 1524.00, gdp_percent: 3.10, capital_percent: 22.0, revenue_percent: 78.0, pension_percent: 0.0, context: '1971 Bangladesh Liberation War operations' },
+        { fiscal_year: '1987-88', total_budget_inr_cr: 11978.00, gdp_percent: 3.80, capital_percent: 31.0, revenue_percent: 69.0, pension_percent: 0.0, context: 'Op Brasstacks & naval blue-water reach peak' },
+        { fiscal_year: '1999-00', total_budget_inr_cr: 47071.00, gdp_percent: 2.50, capital_percent: 27.5, revenue_percent: 59.5, pension_percent: 13.0, context: 'Kargil conflict emergency acquisitions' },
+        { fiscal_year: '2010-11', total_budget_inr_cr: 150000.00, gdp_percent: 2.20, capital_percent: 30.0, revenue_percent: 52.0, pension_percent: 18.0, context: 'Heavy capital modernization (Su-30, C-17, P-8I)' },
+        { fiscal_year: '2019-20', total_budget_inr_cr: 431011.00, gdp_percent: 2.10, capital_percent: 26.5, revenue_percent: 49.5, pension_percent: 24.0, context: 'Balakot strikes, Rafale delivery & OROP impact' },
+        { fiscal_year: '2024-25', total_budget_inr_cr: 621540.00, gdp_percent: 1.91, capital_percent: 27.7, revenue_percent: 49.6, pension_percent: 22.7, context: 'Current Budget: Northern border build-up & Aatmanirbhar push' },
+        { fiscal_year: '2025-26', total_budget_inr_cr: 681420.00, gdp_percent: 1.93, capital_percent: 28.4, revenue_percent: 48.9, pension_percent: 22.7, context: 'Earmarking 75%+ capital procurement for domestic vendors' }
+      ],
+      services: [
+        { service_id: 1, service_name: 'Indian Army', hq_location: 'Sena Bhawan, New Delhi', active_strength: 1237117 },
+        { service_id: 2, service_name: 'Indian Air Force', hq_location: 'Vayu Bhawan, New Delhi', active_strength: 170000 },
+        { service_id: 3, service_name: 'Indian Navy', hq_location: 'Nau Sena Bhawan, New Delhi', active_strength: 67252 },
+        { service_id: 4, service_name: 'DRDO', hq_location: 'DRDO Bhawan, New Delhi', active_strength: 30000 },
+        { service_id: 5, service_name: 'Indian Coast Guard', hq_location: 'Coast Guard HQ, New Delhi', active_strength: 15714 }
+      ],
+      vendors: [
+        { vendor_id: 1, vendor_name: 'Hindustan Aeronautics Ltd (HAL)', vendor_type: 'Domestic PSU', country: 'India', daps_certified: true },
+        { vendor_id: 2, vendor_name: 'Bharat Electronics Ltd (BEL)', vendor_type: 'Domestic PSU', country: 'India', daps_certified: true },
+        { vendor_id: 3, vendor_name: 'Mazagon Dock Shipbuilders (MDL)', vendor_type: 'Domestic PSU', country: 'India', daps_certified: true },
+        { vendor_id: 4, vendor_name: 'Tata Advanced Systems (TASL)', vendor_type: 'Private Domestic', country: 'India', daps_certified: true },
+        { vendor_id: 5, vendor_name: 'Larsen & Toubro Defence (L&T)', vendor_type: 'Private Domestic', country: 'India', daps_certified: true },
+        { vendor_id: 6, vendor_name: 'Dassault Aviation', vendor_type: 'Foreign OEM', country: 'France', daps_certified: true },
+        { vendor_id: 7, vendor_name: 'Almaz-Antey JSC', vendor_type: 'Foreign OEM', country: 'Russia', daps_certified: true },
+        { vendor_id: 8, vendor_name: 'Boeing Defense', vendor_type: 'Foreign OEM', country: 'USA', daps_certified: true }
+      ],
+      procurement_contracts: [
+        { contract_id: 101, title: '83 LCA Tejas Mk-1A Multirole Fighters', service_id: 2, vendor_id: 1, amount_inr_cr: 48000.00, indigenous_percent: 65.0, status: 'In Production', signed_year: 2021 },
+        { contract_id: 102, title: '36 Rafale Omnirole Combat Jets & Weapons', service_id: 2, vendor_id: 6, amount_inr_cr: 59000.00, indigenous_percent: 20.0, status: 'Delivered', signed_year: 2016 },
+        { contract_id: 103, title: '5 Regiments S-400 Triumf Air Defence Systems', service_id: 2, vendor_id: 7, amount_inr_cr: 39000.00, indigenous_percent: 15.0, status: 'In Production', signed_year: 2018 },
+        { contract_id: 104, title: 'Project 75 - 6 Scorpène Kalvari Class Submarines', service_id: 3, vendor_id: 3, amount_inr_cr: 25000.00, indigenous_percent: 42.0, status: 'Delivered', signed_year: 2005 },
+        { contract_id: 105, title: 'Akash Prime Surface-to-Air Missile Regiments', service_id: 1, vendor_id: 2, amount_inr_cr: 11200.00, indigenous_percent: 88.0, status: 'In Production', signed_year: 2022 },
+        { contract_id: 106, title: '118 Main Battle Tanks Arjun Mk-1A', service_id: 1, vendor_id: 1, amount_inr_cr: 7523.00, indigenous_percent: 54.0, status: 'In Production', signed_year: 2021 },
+        { contract_id: 107, title: '100 K9 Vajra-T 155mm Tracked Self-Propelled Guns', service_id: 1, vendor_id: 5, amount_inr_cr: 4500.00, indigenous_percent: 82.0, status: 'Delivered', signed_year: 2017 },
+        { contract_id: 108, title: '56 C-295MW Tactical Military Transport Aircraft', service_id: 2, vendor_id: 4, amount_inr_cr: 21935.00, indigenous_percent: 60.0, status: 'In Production', signed_year: 2021 },
+        { contract_id: 109, title: 'Next Generation Offshore Patrol Vessels (NGOPVs)', service_id: 3, vendor_id: 3, amount_inr_cr: 9780.00, indigenous_percent: 91.0, status: 'Signed', signed_year: 2023 },
+        { contract_id: 110, title: 'BrahMos Extended Range Supersonic Cruise Missiles', service_id: 3, vendor_id: 2, amount_inr_cr: 19500.00, indigenous_percent: 75.0, status: 'Signed', signed_year: 2024 },
+        { contract_id: 111, title: '6 AH-64E Apache Attack Helicopters for Army Aviation', service_id: 1, vendor_id: 8, amount_inr_cr: 4100.00, indigenous_percent: 25.0, status: 'Under Review', signed_year: 2020 },
+        { contract_id: 112, title: 'QRSAM Quick Reaction Surface-to-Air Missiles', service_id: 1, vendor_id: 2, amount_inr_cr: 14812.00, indigenous_percent: 90.0, status: 'Under Review', signed_year: 2024 }
+      ],
+      capital_assets: [
+        { asset_id: 1, asset_name: 'Dassault Rafale F3R', category: 'Fighter Aircraft', service_id: 2, induction_year: 2020, quantity: 36, unit_cost_cr: 1638.00 },
+        { asset_id: 2, asset_name: 'HAL LCA Tejas Mk1', category: 'Fighter Aircraft', service_id: 2, induction_year: 2016, quantity: 40, unit_cost_cr: 310.00 },
+        { asset_id: 3, asset_name: 'S-400 Triumf AD Regiment', category: 'Air Defence', service_id: 2, induction_year: 2021, quantity: 3, unit_cost_cr: 7800.00 },
+        { asset_id: 4, asset_name: 'INS Vikrant (IAC-1) Aircraft Carrier', category: 'Naval Vessel', service_id: 3, induction_year: 2022, quantity: 1, unit_cost_cr: 23000.00 },
+        { asset_id: 5, asset_name: 'Kalvari-Class Scorpène Submarine', category: 'Naval Vessel', service_id: 3, induction_year: 2017, quantity: 6, unit_cost_cr: 4166.00 },
+        { asset_id: 6, asset_name: 'T-90S Bhishma Main Battle Tank', category: 'Armoured Vehicle', service_id: 1, induction_year: 2001, quantity: 1100, unit_cost_cr: 25.00 },
+        { asset_id: 7, asset_name: 'BrahMos Land-Attack Missile Regiment', category: 'Missile System', service_id: 1, induction_year: 2007, quantity: 4, unit_cost_cr: 2800.00 },
+        { asset_id: 8, asset_name: 'Netra AEW&CS (Airborne Early Warning)', category: 'Radar/EW', service_id: 2, induction_year: 2017, quantity: 3, unit_cost_cr: 1200.00 }
+      ],
+      audit_logs: [
+        { log_id: 1, action_type: 'INITIAL_SEED', table_affected: 'SYSTEM', timestamp: '2026-10-18 09:30:00', details: 'Database schema and canonical defense dataset loaded.' }
+      ]
+    };
+
+    let db = {};
+
+    function initDatabase() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          db = JSON.parse(stored);
+        } else {
+          db = JSON.parse(JSON.stringify(INITIAL_DB_SEED));
+          saveDatabase();
+        }
+      } catch (e) {
+        db = JSON.parse(JSON.stringify(INITIAL_DB_SEED));
+      }
+    }
+
+    function saveDatabase() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      } catch (err) {
+        console.error("Local storage error:", err);
+      }
+    }
+
+    function logTransaction(action, table, details) {
+      const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      const newId = db.audit_logs.length > 0 ? Math.max(...db.audit_logs.map(l => l.log_id)) + 1 : 1;
+      db.audit_logs.unshift({
+        log_id: newId,
+        action_type: action,
+        table_affected: table,
+        timestamp: now,
+        details: details
+      });
+      if (db.audit_logs.length > 25) db.audit_logs.pop();
+      saveDatabase();
+      renderAuditLogs();
+    }
+
+    function clearAuditLogs() {
+      db.audit_logs = [{
+        log_id: 1,
+        action_type: 'CLEARED',
+        table_affected: 'AuditLogs',
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        details: 'Audit trail purged by DBA.'
+      }];
+      saveDatabase();
+      renderAuditLogs();
+      showToast("Audit trail cleared", "info");
+    }
+
+    function resetDataset() {
+      db = JSON.parse(JSON.stringify(INITIAL_DB_SEED));
+      saveDatabase();
+      showToast("Default Ministry of Defence dataset reloaded!", "info");
+      refreshAll();
+    }
+
+    /* ----------------------------------------------------
+       2. TAB NAVIGATION & VIEW SWITCHING
+       ---------------------------------------------------- */
+    let currentView = 'dashboard';
+
+    function switchView(viewId) {
+      currentView = viewId;
+      document.querySelectorAll('main section').forEach(sec => sec.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-cyan-950/60', 'text-cyan-400', 'border', 'border-cyan-700/40');
+        btn.classList.add('text-slate-400');
+      });
+
+      const activeNav = document.getElementById(`nav-${viewId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-cyan-950/60', 'text-cyan-400', 'border', 'border-cyan-700/40');
+        activeNav.classList.remove('text-slate-400');
+      }
+
+      const activeSec = document.getElementById(`view-${viewId}`);
+      if (activeSec) {
+        activeSec.classList.remove('hidden');
+      }
+
+      const headers = {
+        'dashboard': ['National Defence Expenditure & Procurement Management System', 'Ministry of Defence (MoD) • Historical Analysis (1947–2026)'],
+        'contracts': ['Defence Capital Procurement Contracts', 'Active Hardware Inductions, Offsets, & Indigenization Content'],
+        'assets': ['Strategic Armed Forces Capital Assets', 'Operational inventory, aircraft, naval vessels, and missile platforms'],
+        'vendors': ['Defence Industrial Base & Manufacturers', 'Domestic PSUs, Private Industry Partners & Foreign OEMs'],
+        'allocations': ['Post-Independence Defence Allocation Ledger', 'Historical budget evolution: 1947, 1962, 1971, 1999 Kargil to Present'],
+        'sql': ['SQL Relational Query Studio', 'Interactive custom SQL interpreter with ACID table joins & aggregates'],
+        'schema': ['Relational Schema & 3NF ER Architecture', 'Entity diagrams, normalization specs, foreign keys, & DDL script']
+      };
+
+      if (headers[viewId]) {
+        document.getElementById('topbar-title').textContent = headers[viewId][0];
+        document.getElementById('topbar-sub').textContent = headers[viewId][1];
+      }
+
+      if (viewId === 'dashboard') renderDashboard();
+      if (viewId === 'contracts') renderContractsTable();
+      if (viewId === 'assets') renderAssetsTable();
+      if (viewId === 'vendors') renderVendorsGrid();
+      if (viewId === 'allocations') renderAllocationsTable();
+      if (viewId === 'sql') initSqlStudio();
+      if (viewId === 'schema') renderSchemaView();
+
+      if (window.innerWidth < 1024) {
+        document.getElementById('sidebar').classList.add('-translate-x-full');
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    }
+
+    /* ----------------------------------------------------
+       3. DASHBOARD METRICS & CHARTS (Chart.js)
+       ---------------------------------------------------- */
+    let chartHistorical = null;
+    let chartBreakdown = null;
+    let chartServiceProc = null;
+    let currentChartScale = 'logarithmic';
+
+    function renderDashboard() {
+      // 1. Metric calculations
+      const latestAllocation = db.allocations[db.allocations.length - 1];
+      document.getElementById('stat-latest-budget').textContent = `₹${latestAllocation.total_budget_inr_cr.toLocaleString('en-IN')} Cr`;
+
+      // Calculate Weighted Indigenous % across signed/in-production contracts
+      let totalContractVal = 0;
+      let weightedIndigenousVal = 0;
+      db.procurement_contracts.forEach(c => {
+        totalContractVal += Number(c.amount_inr_cr);
+        weightedIndigenousVal += Number(c.amount_inr_cr) * (Number(c.indigenous_percent) / 100);
+      });
+      const avgIndigenous = totalContractVal > 0 ? ((weightedIndigenousVal / totalContractVal) * 100).toFixed(1) : '75.0';
+      document.getElementById('stat-indigenous-percent').textContent = `${avgIndigenous}%`;
+      document.getElementById('stat-total-contracts-val').textContent = `₹${Math.round(totalContractVal).toLocaleString('en-IN')} Cr`;
+      document.getElementById('stat-contracts-count').textContent = db.procurement_contracts.length;
+      document.getElementById('badge-contract-count').textContent = db.procurement_contracts.length;
+
+      // Assets Total Valuation
+      let totalAssetOutlay = 0;
+      let totalUnits = 0;
+      db.capital_assets.forEach(a => {
+        totalAssetOutlay += Number(a.quantity) * Number(a.unit_cost_cr);
+        totalUnits += Number(a.quantity);
+      });
+      document.getElementById('stat-total-assets-val').textContent = `₹${Math.round(totalAssetOutlay).toLocaleString('en-IN')} Cr`;
+      document.getElementById('stat-assets-units').textContent = `${totalUnits.toLocaleString('en-IN')}+`;
+
+      // 2. Render Historical Line/Bar Chart
+      const labels = db.allocations.map(a => a.fiscal_year);
+      const dataValues = db.allocations.map(a => a.total_budget_inr_cr);
+
+      const ctxHist = document.getElementById('historicalSpendChart').getContext('2d');
+      if (chartHistorical) chartHistorical.destroy();
+
+      chartHistorical = new Chart(ctxHist, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Defence Outlay (₹ Crore)',
+            data: dataValues,
+            borderColor: '#06b6d4',
+            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#06b6d4',
+            pointBorderColor: '#0b1320',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `₹${ctx.raw.toLocaleString('en-IN')} Crore`
+              }
+            }
+          },
+          scales: {
+            y: {
+              type: currentChartScale,
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: val => '₹' + Number(val).toLocaleString('en-IN')
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            }
+          }
+        }
+      });
+
+      // 3. Render Budget Composition Doughnut
+      const ctxDoughnut = document.getElementById('budgetBreakdownChart').getContext('2d');
+      if (chartBreakdown) chartBreakdown.destroy();
+      chartBreakdown = new Chart(ctxDoughnut, {
+        type: 'doughnut',
+        data: {
+          labels: ['Capital Acquisition', 'Revenue (Pay & Ops)', 'Defence Pensions'],
+          datasets: [{
+            data: [latestAllocation.capital_percent, latestAllocation.revenue_percent, latestAllocation.pension_percent],
+            backgroundColor: ['#06b6d4', '#f59e0b', '#f43f5e'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+
+      // 4. Service-Wise Procurement Bar Chart
+      const serviceSpendMap = {};
+      db.services.forEach(s => serviceSpendMap[s.service_name] = 0);
+      db.procurement_contracts.forEach(c => {
+        const s = db.services.find(srv => srv.service_id === c.service_id);
+        if (s && serviceSpendMap[s.service_name] !== undefined) {
+          serviceSpendMap[s.service_name] += Number(c.amount_inr_cr);
+        }
+      });
+
+      const ctxService = document.getElementById('serviceProcurementChart').getContext('2d');
+      if (chartServiceProc) chartServiceProc.destroy();
+      chartServiceProc = new Chart(ctxService, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(serviceSpendMap),
+          datasets: [{
+            label: 'Procurement Contracts (₹ Cr)',
+            data: Object.values(serviceSpendMap),
+            backgroundColor: ['#06b6d4', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: val => '₹' + val
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#cbd5e1', font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      renderAuditLogs();
+    }
+
+    function setHistoricalChartScale(scaleType) {
+      currentChartScale = scaleType;
+      document.getElementById('btn-scale-log').className = scaleType === 'logarithmic' ? 'px-2.5 py-1 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[11px]' : 'px-2.5 py-1 rounded bg-slate-800 text-slate-400 text-[11px]';
+      document.getElementById('btn-scale-linear').className = scaleType === 'linear' ? 'px-2.5 py-1 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[11px]' : 'px-2.5 py-1 rounded bg-slate-800 text-slate-400 text-[11px]';
+      renderDashboard();
+    }
+
+    function renderAuditLogs() {
+      const container = document.getElementById('audit-log-stream');
+      container.innerHTML = '';
+      db.audit_logs.forEach(log => {
+        const item = document.createElement('div');
+        item.className = 'bg-mil-950/80 p-2 rounded-lg border border-slate-800/80 text-[11px] font-mono flex items-start gap-2';
+        
+        const actionColors = {
+          'INSERT': 'text-emerald-400',
+          'UPDATE': 'text-cyan-400',
+          'DELETE': 'text-rose-400',
+          'INITIAL_SEED': 'text-amber-400',
+          'CLEARED': 'text-slate-400'
+        };
+
+        item.innerHTML = `
+          <span class="font-bold ${actionColors[log.action_type] || 'text-cyan-400'} shrink-0">${log.action_type}</span>
+          <div class="overflow-hidden">
+            <span class="text-slate-300 block truncate">${escapeHtml(log.details)}</span>
+            <span class="text-[9px] text-slate-500">${log.timestamp} • [${log.table_affected}]</span>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    /* ----------------------------------------------------
+       4. PROCUREMENT CONTRACTS (CRUD & FILTERS)
+       ---------------------------------------------------- */
+    function renderContractsTable() {
+      const q = (document.getElementById('contract-search')?.value || '').toLowerCase();
+      const statusFilter = document.getElementById('contract-status-filter')?.value || '';
+      const serviceFilter = document.getElementById('contract-service-filter')?.value || '';
+      const tbody = document.getElementById('contracts-table-body');
+      tbody.innerHTML = '';
+
+      const filtered = db.procurement_contracts.filter(c => {
+        const service = db.services.find(s => s.service_id === c.service_id) || { service_name: '' };
+        const vendor = db.vendors.find(v => v.vendor_id === c.vendor_id) || { vendor_name: '', country: '' };
+        const text = `${c.title} ${service.service_name} ${vendor.vendor_name} ${vendor.country}`.toLowerCase();
+        
+        const matchesQuery = text.includes(q);
+        const matchesStatus = statusFilter ? c.status === statusFilter : true;
+        const matchesService = serviceFilter ? String(c.service_id) === serviceFilter : true;
+        return matchesQuery && matchesStatus && matchesService;
+      });
+
+      filtered.forEach(c => {
+        const service = db.services.find(s => s.service_id === c.service_id) || { service_name: 'Unknown' };
+        const vendor = db.vendors.find(v => v.vendor_id === c.vendor_id) || { vendor_name: 'Unknown', country: 'India' };
+
+        const statusBadges = {
+          'Signed': 'bg-cyan-950 text-cyan-400 border border-cyan-800',
+          'In Production': 'bg-amber-950 text-amber-400 border border-amber-800',
+          'Delivered': 'bg-emerald-950 text-emerald-400 border border-emerald-800',
+          'Under Review': 'bg-rose-950 text-rose-400 border border-rose-800'
+        };
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-cyan-400 font-semibold">#CON-${c.contract_id}</td>
+          <td class="py-3 px-4">
+            <span class="font-bold text-white block">${escapeHtml(c.title)}</span>
+            <span class="text-[10px] text-slate-400 font-mono">Signed Year: ${c.signed_year}</span>
+          </td>
+          <td class="py-3 px-4 text-slate-300">${escapeHtml(service.service_name)}</td>
+          <td class="py-3 px-4">
+            <span class="text-white block font-medium">${escapeHtml(vendor.vendor_name)}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${escapeHtml(vendor.country)}</span>
+          </td>
+          <td class="py-3 px-4 font-mono text-right font-bold text-white">₹${Number(c.amount_inr_cr).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2 py-0.5 rounded font-mono text-[11px] font-bold ${c.indigenous_percent >= 60 ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-slate-800 text-slate-300'}">
+              ${c.indigenous_percent}%
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusBadges[c.status] || 'bg-slate-800'}">
+              ${c.status}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right space-x-1.5">
+            <button onclick="editContract(${c.contract_id})" class="text-cyan-400 hover:text-cyan-300 p-1" title="Edit Contract">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </button>
+            <button onclick="deleteContract(${c.contract_id})" class="text-rose-400 hover:text-rose-300 p-1" title="Delete Contract">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function saveContract(e) {
+      e.preventDefault();
+      const id = document.getElementById('contract-form-id').value;
+      const title = document.getElementById('c-title').value.trim();
+      const serviceId = Number(document.getElementById('c-service').value);
+      const vendorId = Number(document.getElementById('c-vendor').value);
+      const amount = Number(document.getElementById('c-amount').value);
+      const indigenous = Number(document.getElementById('c-indigenous').value);
+      const status = document.getElementById('c-status').value;
+      const year = Number(document.getElementById('c-year').value);
+
+      if (id) {
+        const item = db.procurement_contracts.find(c => c.contract_id === Number(id));
+        if (item) {
+          item.title = title;
+          item.service_id = serviceId;
+          item.vendor_id = vendorId;
+          item.amount_inr_cr = amount;
+          item.indigenous_percent = indigenous;
+          item.status = status;
+          item.signed_year = year;
+          logTransaction('UPDATE', 'ProcurementContracts', `Updated contract #${id}: ${title}`);
+          showToast(`Contract #${id} updated successfully!`, 'success');
+        }
+      } else {
+        const newId = db.procurement_contracts.length > 0 ? Math.max(...db.procurement_contracts.map(c => c.contract_id)) + 1 : 101;
+        db.procurement_contracts.push({
+          contract_id: newId,
+          title,
+          service_id: serviceId,
+          vendor_id: vendorId,
+          amount_inr_cr: amount,
+          indigenous_percent: indigenous,
+          status,
+          signed_year: year
+        });
+        logTransaction('INSERT', 'ProcurementContracts', `Sanctioned contract #${newId}: ${title} (₹${amount} Cr)`);
+        showToast(`Procurement contract sanctioned under ID #${newId}`, 'success');
+      }
+
+      saveDatabase();
+      closeModal('modal-contract');
+      renderContractsTable();
+      if (currentView === 'dashboard') renderDashboard();
+    }
+
+    function editContract(id) {
+      const c = db.procurement_contracts.find(x => x.contract_id === id);
+      if (!c) return;
+      document.getElementById('contract-form-id').value = c.contract_id;
+      document.getElementById('c-title').value = c.title;
+      document.getElementById('c-service').value = c.service_id;
+      document.getElementById('c-vendor').value = c.vendor_id;
+      document.getElementById('c-amount').value = c.amount_inr_cr;
+      document.getElementById('c-indigenous').value = c.indigenous_percent;
+      document.getElementById('c-status').value = c.status;
+      document.getElementById('c-year').value = c.signed_year;
+
+      document.getElementById('modal-contract-title').textContent = `Edit Procurement Contract #CON-${c.contract_id}`;
+      openModal('modal-contract');
+    }
+
+    function deleteContract(id) {
+      if (confirm(`Execute SQL DELETE for Contract #CON-${id}? This will remove it from capital accounts.`)) {
+        const c = db.procurement_contracts.find(x => x.contract_id === id);
+        db.procurement_contracts = db.procurement_contracts.filter(x => x.contract_id !== id);
+        logTransaction('DELETE', 'ProcurementContracts', `Removed Contract #CON-${id} (${c ? c.title : ''})`);
+        saveDatabase();
+        showToast(`Contract #CON-${id} purged.`, 'info');
+        renderContractsTable();
+        if (currentView === 'dashboard') renderDashboard();
+      }
+    }
+
+    /* ----------------------------------------------------
+       5. CAPITAL STRATEGIC ASSETS
+       ---------------------------------------------------- */
+    function renderAssetsTable() {
+      const q = (document.getElementById('asset-search')?.value || '').toLowerCase();
+      const catFilter = document.getElementById('asset-cat-filter')?.value || '';
+      const tbody = document.getElementById('assets-table-body');
+      tbody.innerHTML = '';
+
+      const filtered = db.capital_assets.filter(a => {
+        const matchesQuery = a.asset_name.toLowerCase().includes(q) || a.category.toLowerCase().includes(q);
+        const matchesCat = catFilter ? a.category === catFilter : true;
+        return matchesQuery && matchesCat;
+      });
+
+      filtered.forEach(a => {
+        const service = db.services.find(s => s.service_id === a.service_id) || { service_name: 'Unknown' };
+        const totalCost = Number(a.quantity) * Number(a.unit_cost_cr);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-cyan-400 font-semibold">#AST-0${a.asset_id}</td>
+          <td class="py-3 px-4 font-bold text-white">${escapeHtml(a.asset_name)}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-cyan-300 border border-slate-700">${escapeHtml(a.category)}</span>
+          </td>
+          <td class="py-3 px-4 text-slate-300">${escapeHtml(service.service_name)}</td>
+          <td class="py-3 px-4 font-mono text-center text-slate-300">${a.induction_year}</td>
+          <td class="py-3 px-4 font-mono text-right text-slate-200">${a.quantity}</td>
+          <td class="py-3 px-4 font-mono text-right text-slate-300">₹${Number(a.unit_cost_cr).toFixed(1)} Cr</td>
+          <td class="py-3 px-4 font-mono text-right text-emerald-400 font-bold">₹${totalCost.toLocaleString('en-IN', { minimumFractionDigits: 1 })} Cr</td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="deleteAsset(${a.asset_id})" class="text-rose-400 hover:text-rose-300 p-1" title="Decommission / Delete">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      lucide.createIcons();
+    }
+
+    function saveAsset(e) {
+      e.preventDefault();
+      const name = document.getElementById('a-name').value.trim();
+      const cat = document.getElementById('a-category').value;
+      const serviceId = Number(document.getElementById('a-service').value);
+      const year = Number(document.getElementById('a-year').value);
+      const qty = Number(document.getElementById('a-qty').value);
+      const cost = Number(document.getElementById('a-cost').value);
+
+      const newId = db.capital_assets.length > 0 ? Math.max(...db.capital_assets.map(a => a.asset_id)) + 1 : 1;
+      db.capital_assets.push({
+        asset_id: newId,
+        asset_name: name,
+        category: cat,
+        service_id: serviceId,
+        induction_year: year,
+        quantity: qty,
+        unit_cost_cr: cost
+      });
+
+      logTransaction('INSERT', 'CapitalAssets', `Registered platform: ${name} (${qty} units)`);
+      saveDatabase();
+      closeModal('modal-asset');
+      showToast(`Asset '${name}' registered under ID #AST-0${newId}`, 'success');
+      renderAssetsTable();
+      if (currentView === 'dashboard') renderDashboard();
+    }
+
+    function deleteAsset(id) {
+      if (confirm(`Remove asset record #AST-0${id} from operating inventory?`)) {
+        const a = db.capital_assets.find(x => x.asset_id === id);
+        db.capital_assets = db.capital_assets.filter(x => x.asset_id !== id);
+        logTransaction('DELETE', 'CapitalAssets', `Decommissioned asset: ${a ? a.asset_name : id}`);
+        saveDatabase();
+        showToast("Asset record removed.", "info");
+        renderAssetsTable();
+        if (currentView === 'dashboard') renderDashboard();
+      }
+    }
+
+    /* ----------------------------------------------------
+       6. DEFENCE VENDORS
+       ---------------------------------------------------- */
+    function renderVendorsGrid() {
+      const q = (document.getElementById('vendor-search')?.value || '').toLowerCase();
+      const typeFilter = document.getElementById('vendor-type-filter')?.value || '';
+      const grid = document.getElementById('vendors-card-grid');
+      grid.innerHTML = '';
+
+      const filtered = db.vendors.filter(v => {
+        const matchesQuery = v.vendor_name.toLowerCase().includes(q) || v.country.toLowerCase().includes(q);
+        const matchesType = typeFilter ? v.vendor_type === typeFilter : true;
+        return matchesQuery && matchesType;
+      });
+
+      filtered.forEach(v => {
+        const contracts = db.procurement_contracts.filter(c => c.vendor_id === v.vendor_id);
+        const totalVal = contracts.reduce((acc, curr) => acc + Number(curr.amount_inr_cr), 0);
+
+        const card = document.createElement('div');
+        card.className = 'bg-mil-900/90 rounded-2xl p-5 border border-slate-800 shadow-sm flex flex-col justify-between hover:border-cyan-500/40 transition';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-start justify-between">
+              <div>
+                <h4 class="font-bold text-white text-sm leading-tight">${escapeHtml(v.vendor_name)}</h4>
+                <p class="text-[11px] text-cyan-400 font-mono mt-0.5">${escapeHtml(v.vendor_type)} • ${escapeHtml(v.country)}</p>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${v.daps_certified ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-400'}">
+                ${v.daps_certified ? 'DAPS Cleared' : 'Pending'}
+              </span>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 space-y-1.5 text-xs font-mono">
+              <div class="flex justify-between text-slate-400">
+                <span>Active MoD Contracts:</span>
+                <span class="text-white font-bold">${contracts.length} programs</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Contracted Portfolio:</span>
+                <span class="text-emerald-400 font-bold">₹${totalVal.toLocaleString('en-IN')} Cr</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+            <span class="text-[10px] text-slate-500 font-mono">ID: #VEN-0${v.vendor_id}</span>
+            <button onclick="deleteVendor(${v.vendor_id})" class="text-rose-400 hover:text-rose-300 text-[11px] font-mono">
+              Purge Vendor
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function saveVendor(e) {
+      e.preventDefault();
+      const name = document.getElementById('v-name').value.trim();
+      const type = document.getElementById('v-type').value;
+      const country = document.getElementById('v-country').value.trim();
+      const cert = document.getElementById('v-certified').checked;
+
+      const newId = db.vendors.length > 0 ? Math.max(...db.vendors.map(v => v.vendor_id)) + 1 : 1;
+      db.vendors.push({
+        vendor_id: newId,
+        vendor_name: name,
+        vendor_type: type,
+        country: country,
+        daps_certified: cert
+      });
+
+      logTransaction('INSERT', 'Vendors', `Enlisted vendor: ${name} (${country})`);
+      saveDatabase();
+      closeModal('modal-vendor');
+      showToast(`Vendor '${name}' enlisted!`, 'success');
+      renderVendorsGrid();
+      populateSelectOptions();
+    }
+
+    function deleteVendor(id) {
+      const activeContracts = db.procurement_contracts.filter(c => c.vendor_id === id).length;
+      if (activeContracts > 0) {
+        showToast(`Foreign Key Violation: Cannot delete vendor #VEN-0${id} with ${activeContracts} active procurement contracts.`, 'error');
+        return;
+      }
+      if (confirm(`Delete vendor #VEN-0${id}?`)) {
+        db.vendors = db.vendors.filter(v => v.vendor_id !== id);
+        logTransaction('DELETE', 'Vendors', `Purged vendor #VEN-0${id}`);
+        saveDatabase();
+        showToast("Vendor purged.", "info");
+        renderVendorsGrid();
+        populateSelectOptions();
+      }
+    }
+
+    /* ----------------------------------------------------
+       7. HISTORICAL ALLOCATIONS TABLE
+       ---------------------------------------------------- */
+    function renderAllocationsTable() {
+      const tbody = document.getElementById('allocations-table-body');
+      tbody.innerHTML = '';
+      db.allocations.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-900/60 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-cyan-400">${a.fiscal_year}</td>
+          <td class="py-3 px-4 text-right text-white font-bold">₹${Number(a.total_budget_inr_cr).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+          <td class="py-3 px-4 text-center text-amber-400">${a.gdp_percent}%</td>
+          <td class="py-3 px-4 text-center text-cyan-300">${a.capital_percent}%</td>
+          <td class="py-3 px-4 text-center text-slate-300">${a.revenue_percent}%</td>
+          <td class="py-3 px-4 text-center text-rose-300">${a.pension_percent}%</td>
+          <td class="py-3 px-4 text-slate-400 font-sans text-xs">${escapeHtml(a.context || '')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportAllocationsCsv() {
+      const headers = ['fiscal_year', 'total_budget_inr_cr', 'gdp_percent', 'capital_percent', 'revenue_percent', 'pension_percent', 'context'];
+      const rows = db.allocations.map(a => [
+        a.fiscal_year,
+        a.total_budget_inr_cr,
+        a.gdp_percent,
+        a.capital_percent,
+        a.revenue_percent,
+        a.pension_percent,
+        `"${(a.context || '').replace(/"/g, '""')}"`
+      ].join(','));
+      downloadCsv('India_Defence_Allocations_1947_Present.csv', [headers.join(','), ...rows].join('\n'));
+    }
+
+    /* ----------------------------------------------------
+       8. SQL RELATIONAL QUERY ENGINE SIMULATOR
+       ---------------------------------------------------- */
+    const SQL_PRESET_QUERIES = {
+      1: `-- Multi-Table Relational JOIN: Contracts + Vendors + Armed Services
+SELECT 
+    c.contract_id,
+    c.title AS program_title,
+    s.service_name,
+    v.vendor_name,
+    v.country,
+    c.amount_inr_cr,
+    c.indigenous_percent
+FROM ProcurementContracts c
+JOIN Services s ON c.service_id = s.service_id
+JOIN Vendors v ON c.vendor_id = v.vendor_id
+ORDER BY c.amount_inr_cr DESC;`,
+
+      2: `-- GROUP BY Aggregation: Capital Procurement Allocation by Service
+SELECT 
+    s.service_name,
+    COUNT(c.contract_id) AS total_programs,
+    SUM(c.amount_inr_cr) AS total_sanctioned_cr,
+    AVG(c.indigenous_percent) AS avg_indigenous_content
+FROM Services s
+JOIN ProcurementContracts c ON s.service_id = c.service_id
+GROUP BY s.service_name;`,
+
+      3: `-- Indigenization Breakdown: Domestic PSU vs Private Domestic vs Foreign OEM
+SELECT 
+    v.vendor_type,
+    COUNT(c.contract_id) AS contract_count,
+    SUM(c.amount_inr_cr) AS total_spend_cr
+FROM Vendors v
+JOIN ProcurementContracts c ON v.vendor_id = c.vendor_id
+GROUP BY v.vendor_type;`,
+
+      4: `-- Top Strategic Capital Platforms Ranked by Total Financial Outlay
+SELECT 
+    a.asset_name,
+    a.category,
+    s.service_name,
+    a.quantity,
+    a.unit_cost_cr,
+    (a.quantity * a.unit_cost_cr) AS total_outlay_cr
+FROM CapitalAssets a
+JOIN Services s ON a.service_id = s.service_id
+ORDER BY total_outlay_cr DESC
+LIMIT 5;`
+    };
+
+    let lastSqlTableOutput = [];
+
+    function initSqlStudio() {
+      if (!document.getElementById('sql-editor').value.trim()) {
+        loadSqlPreset(1);
+      }
+    }
+
+    function loadSqlPreset(index) {
+      document.getElementById('sql-editor').value = SQL_PRESET_QUERIES[index];
+      runCustomSql();
+    }
+
+    function runCustomSql() {
+      const raw = document.getElementById('sql-editor').value.trim();
+      const startTime = performance.now();
+      const resultTable = document.getElementById('sql-results-table');
+      const emptyState = document.getElementById('sql-empty-state');
+      resultTable.innerHTML = '';
+
+      if (!raw) {
+        showToast("Please enter a SQL statement", "error");
+        return;
+      }
+
+      try {
+        const cleaned = raw.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+        let rows = [];
+
+        // Evaluator matching preset types or dynamic basic queries
+        if (/FROM\s+Services\s+.*GROUP BY\s+s\.service_name/i.test(cleaned)) {
+          // Preset 2: Service Aggregation
+          const map = {};
+          db.services.forEach(s => {
+            map[s.service_name] = { count: 0, sum: 0, ind: 0 };
+          });
+          db.procurement_contracts.forEach(c => {
+            const s = db.services.find(srv => srv.service_id === c.service_id);
+            if (s && map[s.service_name]) {
+              map[s.service_name].count++;
+              map[s.service_name].sum += Number(c.amount_inr_cr);
+              map[s.service_name].ind += Number(c.indigenous_percent);
+            }
+          });
+          rows = Object.keys(map).map(k => ({
+            service_name: k,
+            total_programs: map[k].count,
+            total_sanctioned_cr: `₹${map[k].sum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+            avg_indigenous_content: map[k].count > 0 ? `${(map[k].ind / map[k].count).toFixed(1)}%` : '0%'
+          }));
+
+        } else if (/FROM\s+Vendors\s+.*GROUP BY\s+v\.vendor_type/i.test(cleaned)) {
+          // Preset 3: Indigenization Index
+          const map = {};
+          db.vendors.forEach(v => map[v.vendor_type] = { count: 0, sum: 0 });
+          db.procurement_contracts.forEach(c => {
+            const v = db.vendors.find(ven => ven.vendor_id === c.vendor_id);
+            if (v && map[v.vendor_type]) {
+              map[v.vendor_type].count++;
+              map[v.vendor_type].sum += Number(c.amount_inr_cr);
+            }
+          });
+          rows = Object.keys(map).map(k => ({
+            vendor_type: k,
+            contract_count: map[k].count,
+            total_spend_cr: `₹${map[k].sum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+          }));
+
+        } else if (/FROM\s+CapitalAssets/i.test(cleaned)) {
+          // Preset 4 / Asset queries
+          rows = db.capital_assets.map(a => {
+            const s = db.services.find(srv => srv.service_id === a.service_id) || { service_name: 'Unknown' };
+            const outlay = Number(a.quantity) * Number(a.unit_cost_cr);
+            return {
+              asset_name: a.asset_name,
+              category: a.category,
+              service_name: s.service_name,
+              quantity: a.quantity,
+              unit_cost_cr: `₹${Number(a.unit_cost_cr).toFixed(1)}`,
+              total_outlay_cr: outlay
+            };
+          }).sort((x, y) => y.total_outlay_cr - x.total_outlay_cr);
+
+          if (/LIMIT\s+5/i.test(cleaned)) rows = rows.slice(0, 5);
+          rows = rows.map(r => ({
+            ...r,
+            total_outlay_cr: `₹${r.total_outlay_cr.toLocaleString('en-IN')} Cr`
+          }));
+
+        } else if (/FROM\s+Allocations/i.test(cleaned)) {
+          rows = db.allocations.map(a => ({
+            fiscal_year: a.fiscal_year,
+            total_budget_inr_cr: `₹${a.total_budget_inr_cr}`,
+            gdp_percent: `${a.gdp_percent}%`,
+            capital_percent: `${a.capital_percent}%`
+          }));
+
+        } else {
+          // Default Preset 1 / General Multi-Table Contracts Join
+          rows = db.procurement_contracts.map(c => {
+            const s = db.services.find(srv => srv.service_id === c.service_id) || { service_name: 'Unknown' };
+            const v = db.vendors.find(ven => ven.vendor_id === c.vendor_id) || { vendor_name: 'Unknown', country: 'India' };
+            return {
+              contract_id: `#CON-${c.contract_id}`,
+              program_title: c.title,
+              service_name: s.service_name,
+              vendor_name: v.vendor_name,
+              country: v.country,
+              amount_inr_cr: `₹${Number(c.amount_inr_cr).toLocaleString('en-IN')}`,
+              indigenous_percent: `${c.indigenous_percent}%`
+            };
+          });
+        }
+
+        lastSqlTableOutput = rows;
+        const duration = (performance.now() - startTime).toFixed(2);
+        document.getElementById('sql-exec-time').textContent = `Query OK (${duration} ms)`;
+        document.getElementById('sql-rows-count').textContent = rows.length;
+
+        if (rows.length === 0) {
+          emptyState.classList.remove('hidden');
+          emptyState.textContent = 'Query executed successfully with 0 rows matching.';
+          return;
+        }
+
+        emptyState.classList.add('hidden');
+        const cols = Object.keys(rows[0]);
+
+        const thead = document.createElement('thead');
+        thead.className = 'bg-mil-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800';
+        const headTr = document.createElement('tr');
+        cols.forEach(col => {
+          const th = document.createElement('th');
+          th.className = 'py-2.5 px-4';
+          th.textContent = col;
+          headTr.appendChild(th);
+        });
+        thead.appendChild(headTr);
+        resultTable.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        tbody.className = 'divide-y divide-slate-800 text-slate-200';
+        rows.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-cyan-950/20 transition font-mono text-[11px]';
+          cols.forEach(col => {
+            const td = document.createElement('td');
+            td.className = 'py-2.5 px-4 whitespace-nowrap';
+            td.textContent = row[col] !== undefined ? row[col] : 'NULL';
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        resultTable.appendChild(tbody);
+
+      } catch (err) {
+        document.getElementById('sql-exec-time').textContent = 'Syntax Error';
+        showToast(`SQL Engine Error: ${err.message}`, 'error');
+      }
+    }
+
+    function exportSqlToCsv() {
+      if (!lastSqlTableOutput || lastSqlTableOutput.length === 0) {
+        showToast("No active SQL output to export.", "error");
+        return;
+      }
+      const headers = Object.keys(lastSqlTableOutput[0]).join(',');
+      const rows = lastSqlTableOutput.map(r => Object.values(r).map(val => `"${String(val).replace(/"/g, '""')}"`).join(','));
+      downloadCsv(`MoD_SQL_Query_${Date.now()}.csv`, [headers, ...rows].join('\n'));
+    }
+
+    function downloadCsv(fileName, content) {
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("CSV dataset downloaded successfully!", "success");
+    }
+
+    /* ----------------------------------------------------
+       9. SCHEMA & DDL SCRIPT SPECIFICATION
+       ---------------------------------------------------- */
+    const DDL_CANONICAL_SCRIPT = `-- ===================================================================
+-- DATABASE SCHEMA: India Defence Expenditure & Procurement Management (IDE-PMS)
+-- Target DBMS: MySQL 8.0+ / PostgreSQL 15+ / MariaDB
+-- Normalization: 3NF / BCNF Certified
+-- Course: Database Management Systems (CS304) Mini-Project
+-- ===================================================================
+
+CREATE DATABASE IF NOT EXISTS IndiaDefenceDBMS;
+USE IndiaDefenceDBMS;
+
+-- 1. Master Historical Allocations (1947 to Present)
+CREATE TABLE Allocations (
+    fiscal_year VARCHAR(10) PRIMARY KEY,
+    total_budget_inr_cr DECIMAL(12, 2) NOT NULL CHECK (total_budget_inr_cr > 0),
+    gdp_percent DECIMAL(4, 2) NOT NULL,
+    capital_percent DECIMAL(4, 2) NOT NULL,
+    revenue_percent DECIMAL(4, 2) NOT NULL,
+    pension_percent DECIMAL(4, 2) NOT NULL,
+    context TEXT
+);
+
+-- 2. Armed Services Master Table
+CREATE TABLE Services (
+    service_id INT AUTO_INCREMENT PRIMARY KEY,
+    service_name VARCHAR(50) NOT NULL UNIQUE,
+    hq_location VARCHAR(100) NOT NULL,
+    active_strength INT NOT NULL CHECK (active_strength >= 0)
+);
+
+-- 3. Defence Industrial Base & Vendors
+CREATE TABLE Vendors (
+    vendor_id INT AUTO_INCREMENT PRIMARY KEY,
+    vendor_name VARCHAR(100) NOT NULL,
+    vendor_type ENUM('Domestic PSU', 'Private Domestic', 'Foreign OEM') NOT NULL,
+    country VARCHAR(50) NOT NULL,
+    daps_certified BOOLEAN DEFAULT TRUE
+);
+
+-- 4. Procurement Contracts (M:N Associative Entity with Financials)
+CREATE TABLE ProcurementContracts (
+    contract_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    service_id INT NOT NULL,
+    vendor_id INT NOT NULL,
+    amount_inr_cr DECIMAL(12, 2) NOT NULL CHECK (amount_inr_cr > 0),
+    indigenous_percent DECIMAL(5, 2) NOT NULL CHECK (indigenous_percent BETWEEN 0 AND 100),
+    status ENUM('Signed', 'In Production', 'Delivered', 'Under Review') DEFAULT 'Signed',
+    signed_year INT NOT NULL CHECK (signed_year >= 1947),
+    FOREIGN KEY (service_id) REFERENCES Services(service_id)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (vendor_id) REFERENCES Vendors(vendor_id)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 5. Operational Capital Assets Inventory
+CREATE TABLE CapitalAssets (
+    asset_id INT AUTO_INCREMENT PRIMARY KEY,
+    asset_name VARCHAR(100) NOT NULL,
+    category ENUM('Fighter Aircraft', 'Air Defence', 'Naval Vessel', 'Radar/EW', 'Armoured Vehicle', 'Missile System') NOT NULL,
+    service_id INT NOT NULL,
+    induction_year INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_cost_cr DECIMAL(10, 2) NOT NULL CHECK (unit_cost_cr >= 0),
+    FOREIGN KEY (service_id) REFERENCES Services(service_id)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- 6. Audit & Non-Repudiation Transaction Logs
+CREATE TABLE AuditLogs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    action_type ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+    table_affected VARCHAR(50) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    details TEXT NOT NULL
+);`;
+
+    function renderSchemaView() {
+      document.getElementById('ddl-source-view').textContent = DDL_CANONICAL_SCRIPT;
+    }
+
+    function copyDdlScript() {
+      const text = DDL_CANONICAL_SCRIPT;
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      const label = document.getElementById('copy-ddl-btn-label');
+      label.textContent = 'Copied to Clipboard!';
+      setTimeout(() => label.textContent = 'Copy MySQL DDL Script', 2000);
+      showToast("DDL SQL script copied to clipboard!", "info");
+    }
+
+    /* ----------------------------------------------------
+       10. UTILITIES, DROPDOWNS & MODALS
+       ---------------------------------------------------- */
+    function populateSelectOptions() {
+      // Contract service dropdown & Asset service dropdown
+      const cService = document.getElementById('c-service');
+      const aService = document.getElementById('a-service');
+      const filterService = document.getElementById('contract-service-filter');
+      
+      const serviceOptions = db.services.map(s => `<option value="${s.service_id}">${escapeHtml(s.service_name)}</option>`).join('');
+      if (cService) cService.innerHTML = serviceOptions;
+      if (aService) aService.innerHTML = serviceOptions;
+      if (filterService) filterService.innerHTML = '<option value="">All Services</option>' + serviceOptions;
+
+      // Contract vendor dropdown
+      const cVendor = document.getElementById('c-vendor');
+      if (cVendor) {
+        cVendor.innerHTML = db.vendors.map(v => `<option value="${v.vendor_id}">${escapeHtml(v.vendor_name)} (${escapeHtml(v.country)})</option>`).join('');
+      }
+    }
+
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) {
+        m.classList.remove('hidden');
+        if (id === 'modal-contract' && !document.getElementById('contract-form-id').value) {
+          document.getElementById('form-contract').reset();
+          document.getElementById('contract-form-id').value = '';
+          document.getElementById('modal-contract-title').textContent = 'Add New Procurement Contract';
+        }
+      }
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.classList.add('hidden');
+      if (id === 'modal-contract') {
+        document.getElementById('contract-form-id').value = '';
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const colors = {
+        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-200',
+        error: 'bg-rose-950/95 border-rose-500 text-rose-200',
+        info: 'bg-mil-900/95 border-cyan-500 text-cyan-200'
+      };
+
+      const icons = {
+        success: 'check-circle',
+        error: 'alert-triangle',
+        info: 'shield-alert'
+      };
+
+      toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border backdrop-blur-md shadow-2xl text-xs transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i>
+        <span class="font-mono font-medium">${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function refreshAll() {
+      populateSelectOptions();
+      renderDashboard();
+      renderContractsTable();
+      renderAssetsTable();
+      renderVendorsGrid();
+      renderAllocationsTable();
+      renderSchemaView();
+    }
+
+    /* ----------------------------------------------------
+       11. BOOTSTRAP SYSTEM
+       ---------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      initDatabase();
+      refreshAll();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
